@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key><string>MDown</string>
+    <key>CFBundleDisplayName</key><string>MDown</string>
+    <key>CFBundleIdentifier</key><string>local.mdown.app</string>
+    <key>CFBundleIconFile</key><string>AppIcon</string>
+    <key>CFBundleExecutable</key><string>MDown</string>
+    <key>CFBundlePackageType</key><string>APPL</string>
+    <key>CFBundleShortVersionString</key><string>1.4</string>
+    <key>CFBundleVersion</key><string>4</string>
+    <key>NSHumanReadableCopyright</key><string>Peter Plyuvkov &amp; Claude</string>
+    <key>LSMinimumSystemVersion</key><string>13.0</string>
+    <key>NSHighResolutionCapable</key><true/>
+    <key>NSPrincipalClass</key><string>NSApplication</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key><string>Markdown</string>
+            <key>CFBundleTypeRole</key><string>Viewer</string>
+            <key>LSHandlerRank</key><string>Alternate</string>
+            <key>CFBundleTypeExtensions</key>
+            <array><string>md</string><string>markdown</string><string>mdown</string></array>
+            <key>LSItemContentTypes</key>
+            <array><string>net.daringfireball.markdown</string></array>
+        </dict>
+    </array>
+</dict>
+</plist>
