@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Красит само окно (включая заголовок) в цвет темы, чтобы не было полос разных оттенков.
 struct WindowTint: NSViewRepresentable {
@@ -167,6 +168,15 @@ struct RootHeader: View {
             .fixedSize()
             .help("Новая заметка или раздел в «\(root.url.lastPathComponent)»")
         }
+        .contentShape(Rectangle())
+        .onDrop(of: [.plainText], isTargeted: nil) { providers in
+            guard let item = providers.first else { return false }
+            _ = item.loadObject(ofClass: NSString.self) { obj, _ in
+                guard let path = obj as? String else { return }
+                DispatchQueue.main.async { model.place(path, in: root.url, before: nil) }
+            }
+            return true
+        }
         .contextMenu {
             Button("Новая заметка") { model.createNote(in: root.url) }
             Button("Новый раздел") { model.createSection(in: root.url) }
@@ -203,17 +213,73 @@ struct NodeView: View {
     }
 }
 
+/// Точка-метка, как тег в Finder.
+struct TagDot: View {
+    let color: Color
+    var body: some View {
+        Circle().fill(color)
+            .frame(width: 10, height: 10)
+            .overlay(Circle().strokeBorder(Color.black.opacity(0.14), lineWidth: 0.5))
+    }
+}
+
+/// Круглая иконка для пунктов меню «Цвет» (с галочкой у выбранного).
+func tagMenuImage(_ color: NSColor, checked: Bool) -> NSImage {
+    let img = NSImage(size: NSSize(width: 14, height: 14), flipped: false) { r in
+        let circle = NSBezierPath(ovalIn: r.insetBy(dx: 1, dy: 1))
+        color.setFill(); circle.fill()
+        NSColor.black.withAlphaComponent(0.18).setStroke(); circle.lineWidth = 0.5; circle.stroke()
+        if checked {
+            let tick = NSBezierPath()
+            tick.move(to: NSPoint(x: 4, y: 7)); tick.line(to: NSPoint(x: 6.2, y: 4.8)); tick.line(to: NSPoint(x: 10, y: 9.6))
+            NSColor.white.setStroke(); tick.lineWidth = 1.6; tick.lineCapStyle = .round; tick.lineJoinStyle = .round; tick.stroke()
+        }
+        return true
+    }
+    img.isTemplate = false
+    return img
+}
+
+/// Бросание на строку списка: верхняя часть — перед строкой, нижняя — после, середина раздела — внутрь.
+struct RowDropDelegate: DropDelegate {
+    let model: ReaderModel
+    let node: FileNode
+    let height: CGFloat
+    @Binding var hover: DropPos?
+
+    private func position(_ info: DropInfo) -> DropPos {
+        let y = info.location.y
+        if node.isDir { return y < height * 0.25 ? .before : (y > height * 0.75 ? .after : .into) }
+        return y < height / 2 ? .before : .after
+    }
+    func validateDrop(info: DropInfo) -> Bool { info.hasItemsConforming(to: [.plainText]) }
+    func dropEntered(info: DropInfo) { hover = position(info) }
+    func dropUpdated(info: DropInfo) -> DropProposal? { hover = position(info); return DropProposal(operation: .move) }
+    func dropExited(info: DropInfo) { hover = nil }
+    func performDrop(info: DropInfo) -> Bool {
+        let pos = position(info)
+        hover = nil
+        guard let item = info.itemProviders(for: [.plainText]).first else { return false }
+        _ = item.loadObject(ofClass: NSString.self) { obj, _ in
+            guard let path = obj as? String else { return }
+            DispatchQueue.main.async { model.drop(path, on: node, position: pos) }
+        }
+        return true
+    }
+}
+
 struct NodeRow: View {
     @EnvironmentObject var model: ReaderModel
     let node: FileNode
+    @State private var hover: DropPos?
+    @State private var height: CGFloat = 26
 
     private var title: String {
         node.isDir ? node.name : (node.name as NSString).deletingPathExtension
     }
 
-    private func icon(_ tag: LabelTag?) -> some View {
-        Image(systemName: node.isDir ? "folder" : "doc.text")
-            .foregroundStyle(tag?.color ?? Color.secondary)
+    private var icon: some View {
+        Image(systemName: node.isDir ? "folder" : "doc.text").foregroundStyle(.secondary)
     }
 
     private func tapped() {
@@ -225,26 +291,43 @@ struct NodeRow: View {
         }
     }
 
+    @ViewBuilder private var dropIndicator: some View {
+        switch hover {
+        case .before: VStack { Rectangle().fill(Color.accentColor).frame(height: 2); Spacer() }
+        case .after: VStack { Spacer(); Rectangle().fill(Color.accentColor).frame(height: 2) }
+        case .into: RoundedRectangle(cornerRadius: 6).stroke(Color.accentColor, lineWidth: 2)
+        case nil: EmptyView()
+        }
+    }
+
     var body: some View {
         let tag = model.labelTag(for: node.id)
         Group {
             if model.renaming == node.id {
                 HStack(spacing: 6) {
-                    icon(tag)
+                    icon
                     RenameField(node: node, initial: title)
                 }
             } else {
                 HStack(spacing: 6) {
-                    icon(tag)
+                    icon
                     Text(title).lineLimit(1)
+                    if let tag { TagDot(color: tag.dot) }      // точка рядом с названием, как в Finder
                     Spacer(minLength: 4)
-                    if let tag { Circle().fill(tag.color).frame(width: 9, height: 9) }   // точка, как тег в Finder
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())          // клик по любой части строки, в том числе по тексту
+                .contentShape(Rectangle())                      // клик по любой части строки
                 .onTapGesture { tapped() }
+                .onDrag { NSItemProvider(object: node.id as NSString) }
             }
         }
+        .background(GeometryReader { g in
+            Color.clear
+                .onAppear { height = g.size.height }
+                .onChange(of: g.size.height) { height = $0 }
+        })
+        .overlay(dropIndicator.allowsHitTesting(false))
+        .onDrop(of: [.plainText], delegate: RowDropDelegate(model: model, node: node, height: height, hover: $hover))
         .contextMenu {
             if node.isDir {
                 Button("Новая заметка здесь") { model.createNote(in: URL(fileURLWithPath: node.id)) }
@@ -252,8 +335,14 @@ struct NodeRow: View {
                 Divider()
             }
             Menu("Цвет") {
-                ForEach(LabelTag.allCases, id: \.self) { t in
-                    Button((model.labels[node.id] == t.rawValue ? "✓ " : "") + t.emoji + " " + t.title) { model.setLabel(node.id, t) }
+                ForEach(Pastel.allCases, id: \.self) { t in
+                    Button { model.setLabel(node.id, t) } label: {
+                        Label {
+                            Text(t.title)
+                        } icon: {
+                            Image(nsImage: tagMenuImage(t.dotNS, checked: model.labels[node.id] == t.rawValue)).renderingMode(.original)
+                        }
+                    }
                 }
                 Divider()
                 Button("Без цвета") { model.setLabel(node.id, nil) }

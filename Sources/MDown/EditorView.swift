@@ -6,10 +6,6 @@ final class FormattingTextView: NSTextView {
     /// Вызывается, если форматирование применили при выключенной правке: включаем её.
     var ensureEditing: (() -> Void)?
 
-    private static let markColors: [(key: String, title: String, hex: String)] = [
-        ("y", "Жёлтый", "#fff1a8"), ("g", "Зелёный", "#cdeec8"), ("b", "Голубой", "#c4e3ff"),
-        ("p", "Розовый", "#ffd3e2"), ("v", "Сиреневый", "#e2d6ff"), ("o", "Персиковый", "#ffdcb9"),
-    ]
     private static let needsSelection: Set<String> = ["b", "i", "s", "code", "unmark"]
 
     // MARK: Меню
@@ -36,9 +32,9 @@ final class FormattingTextView: NSTextView {
         menu.addItem(.separator())
 
         let marks = NSMenu()
-        for c in Self.markColors {
-            let it = item(c.title, "mark:" + c.key)
-            it.image = Self.swatch(c.hex)
+        for c in Pastel.allCases {
+            let it = item(c.title, "mark:" + c.rawValue)
+            it.image = Self.swatch(c.hlLight)
             marks.addItem(it)
         }
         let markItem = NSMenuItem(title: "Выделить цветом", action: nil, keyEquivalent: "")

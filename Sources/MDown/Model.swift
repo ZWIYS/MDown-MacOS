@@ -36,35 +36,68 @@ enum AppTheme: String, CaseIterable {
     }
 }
 
-/// Пастельный оттенок фона (те же тона, что у выделения текста).
-enum Tint: String, CaseIterable {
-    case none, yellow, green, blue, pink, purple, orange
+/// Единая пастельная палитра в цветах macOS (плюс розовый): фон темы, выделение текста, метки.
+enum Pastel: String, CaseIterable {
+    case r, o, y, g, b, v, p, x   // красный, оранжевый, жёлтый, зелёный, синий, фиолетовый, розовый, серый
 
     var title: String {
         switch self {
-        case .none: return "Без цвета"; case .yellow: return "Лимон"; case .green: return "Мята"
-        case .blue: return "Небо"; case .pink: return "Розовый"; case .purple: return "Сирень"; case .orange: return "Персик"
+        case .r: return "Красный"; case .o: return "Оранжевый"; case .y: return "Жёлтый"; case .g: return "Зелёный"
+        case .b: return "Синий"; case .v: return "Фиолетовый"; case .p: return "Розовый"; case .x: return "Серый"
         }
     }
-    var lightHex: String {
+    /// Маркер в светлой теме
+    var hlLight: String {
         switch self {
-        case .none: return "#ffffff"; case .yellow: return "#fff8d6"; case .green: return "#eaf7e5"
-        case .blue: return "#e6f2ff"; case .pink: return "#ffeaf1"; case .purple: return "#f0eaff"; case .orange: return "#fff0e1"
+        case .r: return "#ffc9c4"; case .o: return "#ffdcb9"; case .y: return "#fff1a8"; case .g: return "#cdeec8"
+        case .b: return "#c4e3ff"; case .v: return "#e2d6ff"; case .p: return "#ffd3e2"; case .x: return "#dcdce1"
         }
     }
-    var darkHex: String {
+    /// Маркер в тёмной теме (CSS)
+    var hlDark: String {
         switch self {
-        case .none: return "#1e1e1e"; case .yellow: return "#2c2a19"; case .green: return "#1c2a1f"
-        case .blue: return "#1a2633"; case .pink: return "#2f1d25"; case .purple: return "#251f33"; case .orange: return "#302519"
+        case .r: return "rgba(255,69,58,.34)"; case .o: return "rgba(255,159,10,.34)"; case .y: return "rgba(255,214,10,.30)"
+        case .g: return "rgba(52,199,89,.30)"; case .b: return "rgba(10,132,255,.38)"; case .v: return "rgba(175,130,255,.40)"
+        case .p: return "rgba(255,55,95,.32)"; case .x: return "rgba(152,152,157,.38)"
         }
     }
-    var swatchHex: String {
+    var tintLight: String {
         switch self {
-        case .none: return "#e5e5ea"; case .yellow: return "#fff1a8"; case .green: return "#cdeec8"
-        case .blue: return "#c4e3ff"; case .pink: return "#ffd3e2"; case .purple: return "#e2d6ff"; case .orange: return "#ffdcb9"
+        case .r: return "#ffecea"; case .o: return "#fff0e1"; case .y: return "#fff8d6"; case .g: return "#eaf7e5"
+        case .b: return "#e6f2ff"; case .v: return "#f0eaff"; case .p: return "#ffeaf1"; case .x: return "#efeff2"
         }
     }
-    var swatch: Color { Color(nsColor: Tint.color(swatchHex)) }
+    var tintDark: String {
+        switch self {
+        case .r: return "#33201f"; case .o: return "#302519"; case .y: return "#2c2a19"; case .g: return "#1c2a1f"
+        case .b: return "#1a2633"; case .v: return "#251f33"; case .p: return "#2f1d25"; case .x: return "#29292c"
+        }
+    }
+    /// Цвет точки-метки (как теги в Finder, но мягче)
+    var dotHex: String {
+        switch self {
+        case .r: return "#f26d6d"; case .o: return "#f6a35a"; case .y: return "#f7d55a"; case .g: return "#6fcf7a"
+        case .b: return "#5aa8f7"; case .v: return "#b872ee"; case .p: return "#f478a8"; case .x: return "#a8a8ad"
+        }
+    }
+    var dotNS: NSColor { Tint.color(dotHex) }
+    var dot: Color { Color(nsColor: dotNS) }
+}
+
+/// Пастельный оттенок всего приложения.
+enum Tint: String, CaseIterable {
+    case none, red, orange, yellow, green, blue, purple, pink, gray
+
+    var pastel: Pastel? {
+        switch self {
+        case .none: return nil; case .red: return .r; case .orange: return .o; case .yellow: return .y; case .green: return .g
+        case .blue: return .b; case .purple: return .v; case .pink: return .p; case .gray: return .x
+        }
+    }
+    var title: String { pastel?.title ?? "Без цвета" }
+    var lightHex: String { pastel?.tintLight ?? "#ffffff" }
+    var darkHex: String { pastel?.tintDark ?? "#1e1e1e" }
+    var swatch: Color { Color(nsColor: Tint.color(pastel?.hlLight ?? "#e5e5ea")) }
 
     /// Цвет фона для нативных вью: сам переключается между светлой и тёмной темой.
     var nsColor: NSColor {
@@ -86,24 +119,7 @@ enum Tint: String, CaseIterable {
     }
 }
 
-/// Цветная метка раздела или заметки (точка, как теги в Finder).
-enum LabelTag: String, CaseIterable {
-    case y, g, b, p, v, o
-    var title: String {
-        switch self { case .y: return "Жёлтый"; case .g: return "Зелёный"; case .b: return "Голубой"
-        case .p: return "Розовый"; case .v: return "Сиреневый"; case .o: return "Персиковый" }
-    }
-    var emoji: String {
-        switch self { case .y: return "🟡"; case .g: return "🟢"; case .b: return "🔵"; case .p: return "🩷"; case .v: return "🟣"; case .o: return "🟠" }
-    }
-    /// Чуть насыщеннее фоновых пастелей, чтобы точка была видна на любом фоне.
-    var color: Color {
-        let hex: String
-        switch self { case .y: hex = "#f2c744"; case .g: hex = "#63c26b"; case .b: hex = "#58a6f2"
-        case .p: hex = "#f2729f"; case .v: hex = "#a182ee"; case .o: hex = "#f59e56" }
-        return Color(nsColor: Tint.color(hex))
-    }
-}
+enum DropPos { case before, into, after }
 
 @MainActor
 final class ReaderModel: ObservableObject {
@@ -124,6 +140,7 @@ final class ReaderModel: ObservableObject {
     @Published var mainURL: URL
     @Published var extraFolders: [URL] { didSet { UserDefaults.standard.set(extraFolders.map(\.path), forKey: "extraFolders") } }
     @Published var labels: [String: String] { didSet { UserDefaults.standard.set(labels, forKey: "labels") } }   // путь -> цвет метки
+    @Published var order: [String: [String]] { didSet { UserDefaults.standard.set(order, forKey: "order") } }   // раздел -> порядок элементов
     @Published var tempFolder: URL?           // папка внешнего файла, открытого через «Открыть…»
 
     @Published var mode: ReadMode { didSet { UserDefaults.standard.set(mode.rawValue, forKey: "mode") } }
@@ -149,6 +166,7 @@ final class ReaderModel: ObservableObject {
         let z = d.double(forKey: "zoom")
         zoom = z > 0 ? z : 1.0
         mainURL = d.string(forKey: "mainFolder").map { URL(fileURLWithPath: $0).standardizedFileURL } ?? Self.defaultMain
+        order = (d.dictionary(forKey: "order") as? [String: [String]]) ?? [:]
         labels = (d.dictionary(forKey: "labels") as? [String: String]) ?? [:]
         extraFolders = (d.stringArray(forKey: "extraFolders") ?? []).map { URL(fileURLWithPath: $0).standardizedFileURL }
 
@@ -188,12 +206,12 @@ final class ReaderModel: ObservableObject {
     // MARK: Корни
 
     func rebuildRoots() {
-        var r = [Root(url: mainURL, tree: Self.buildTree(mainURL, keepEmpty: true), kind: .main)]
+        var r = [Root(url: mainURL, tree: Self.buildTree(mainURL, keepEmpty: true, order: order), kind: .main)]
         for u in extraFolders where u.path != mainURL.path {
-            r.append(Root(url: u, tree: Self.buildTree(u, keepEmpty: true), kind: .extra))
+            r.append(Root(url: u, tree: Self.buildTree(u, keepEmpty: true, order: order), kind: .extra))
         }
         if let t = tempFolder, !r.contains(where: { $0.url.path == t.path }) {
-            r.append(Root(url: t, tree: Self.buildTree(t, keepEmpty: false), kind: .temp))
+            r.append(Root(url: t, tree: Self.buildTree(t, keepEmpty: false, order: order), kind: .temp))
         }
         roots = r
     }
@@ -347,14 +365,14 @@ final class ReaderModel: ObservableObject {
         renaming = url.path
     }
 
-    func setLabel(_ path: String, _ tag: LabelTag?) { labels[path] = tag?.rawValue }
+    func setLabel(_ path: String, _ tag: Pastel?) { labels[path] = tag?.rawValue }
 
     /// Своя метка элемента или метка ближайшего раздела выше: положили заметку в «синий» раздел — она тоже синяя.
-    func labelTag(for path: String) -> LabelTag? {
+    func labelTag(for path: String) -> Pastel? {
         guard let root = root(containing: path) else { return nil }
         var p = path
         while true {
-            if let k = labels[p], let t = LabelTag(rawValue: k) { return t }
+            if let k = labels[p], let t = Pastel(rawValue: k) { return t }
             guard p.count > root.url.path.count else { return nil }
             p = (p as NSString).deletingLastPathComponent
         }
@@ -378,10 +396,20 @@ final class ReaderModel: ObservableObject {
         guard new.path != old.path else { return }
         guard !FileManager.default.fileExists(atPath: new.path) else { NSSound.beep(); return }
         do { try FileManager.default.moveItem(at: old, to: new) } catch { NSSound.beep(); return }
-        moveHighlights(from: old.path, to: new.path)
+        let parent = old.deletingLastPathComponent().path
+        if var list = order[parent], let k = list.firstIndex(of: old.lastPathComponent) {
+            list[k] = new.lastPathComponent
+            order[parent] = list
+        }
+        relocate(old: old.path, new: new.path)
+        rebuildRoots()
+    }
 
+    /// Обновляет все ссылки на путь (открытый файл, выбор, метки, порядок, выделения) после переименования или переноса.
+    private func relocate(old: String, new: String) {
+        moveHighlights(from: old, to: new)
         func remap(_ p: String) -> String? {
-            p == old.path || p.hasPrefix(old.path + "/") ? new.path + String(p.dropFirst(old.path.count)) : nil
+            p == old || p.hasPrefix(old + "/") ? new + String(p.dropFirst(old.count)) : nil
         }
         if let f = fileURL, let np = remap(f.path) {
             fileURL = URL(fileURLWithPath: np)
@@ -389,7 +417,67 @@ final class ReaderModel: ObservableObject {
         }
         if let s = selection, let np = remap(s) { selection = np }
         labels = Dictionary(labels.map { (remap($0.key) ?? $0.key, $0.value) }, uniquingKeysWith: { a, _ in a })
+        order = Dictionary(order.map { (remap($0.key) ?? $0.key, $0.value) }, uniquingKeysWith: { a, _ in a })
         expanded = Set(expanded.map { remap($0) ?? $0 })
+    }
+
+    // MARK: Перетаскивание в списке
+
+    func children(ofFolder path: String) -> [FileNode] {
+        if let r = roots.first(where: { $0.url.path == path }) { return r.tree }
+        func find(_ nodes: [FileNode]) -> [FileNode]? {
+            for n in nodes {
+                if n.id == path { return n.children ?? [] }
+                if let c = n.children, let f = find(c) { return f }
+            }
+            return nil
+        }
+        for r in roots { if let f = find(r.tree) { return f } }
+        return []
+    }
+
+    /// Бросили `src` на строку `node`: внутрь раздела, перед или после строки.
+    func drop(_ src: String, on node: FileNode, position: DropPos) {
+        guard src != node.id else { return }
+        switch position {
+        case .into where node.isDir:
+            place(src, in: URL(fileURLWithPath: node.id), before: nil)
+        case .into, .before, .after:
+            let parent = (node.id as NSString).deletingLastPathComponent
+            let sibs = children(ofFolder: parent).filter { $0.id != src }
+            let idx = sibs.firstIndex(where: { $0.id == node.id })
+            var before: String?
+            if position == .after {
+                if let idx, idx + 1 < sibs.count { before = sibs[idx + 1].name }
+            } else { before = node.name }
+            place(src, in: URL(fileURLWithPath: parent), before: before)
+        }
+    }
+
+    /// Переносит элемент в папку (если нужно) и ставит его перед `before` (или в конец).
+    func place(_ src: String, in dest: URL, before: String?) {
+        saveNow()
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: src) else { return }
+        if dest.path == src || dest.path.hasPrefix(src + "/") { NSSound.beep(); return }   // раздел нельзя внутрь самого себя
+        let srcURL = URL(fileURLWithPath: src)
+        var name = srcURL.lastPathComponent
+        if srcURL.deletingLastPathComponent().path != dest.path {
+            var target = dest.appendingPathComponent(name)
+            if fm.fileExists(atPath: target.path) {
+                let ext = srcURL.pathExtension
+                target = uniqueURL(in: dest, name: ext.isEmpty ? name : srcURL.deletingPathExtension().lastPathComponent,
+                                   ext: ext.isEmpty ? nil : ext)
+            }
+            do { try fm.moveItem(at: srcURL, to: target) } catch { NSSound.beep(); return }
+            relocate(old: src, new: target.path)
+            name = target.lastPathComponent
+        }
+        rebuildRoots()
+        var names = children(ofFolder: dest.path).map(\.name).filter { $0 != name }
+        if let b = before, let k = names.firstIndex(of: b) { names.insert(name, at: k) } else { names.append(name) }
+        order[dest.path] = names
+        expanded.insert(dest.path)
         rebuildRoots()
     }
 
@@ -542,12 +630,12 @@ final class ReaderModel: ObservableObject {
 
     private static let skipDirs: Set<String> = ["node_modules", ".git", "build", ".build", "Pods", "DerivedData", "Library"]
 
-    static func buildTree(_ root: URL, keepEmpty: Bool) -> [FileNode] {
+    static func buildTree(_ root: URL, keepEmpty: Bool, order: [String: [String]]) -> [FileNode] {
         var budget = 8000
-        return build(root, depth: 0, budget: &budget, keepEmpty: keepEmpty)
+        return build(root, depth: 0, budget: &budget, keepEmpty: keepEmpty, order: order)
     }
 
-    private static func build(_ dir: URL, depth: Int, budget: inout Int, keepEmpty: Bool) -> [FileNode] {
+    private static func build(_ dir: URL, depth: Int, budget: inout Int, keepEmpty: Bool, order: [String: [String]]) -> [FileNode] {
         guard budget > 0,
               let items = try? FileManager.default.contentsOfDirectory(
                 at: dir, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles])
@@ -558,7 +646,7 @@ final class ReaderModel: ObservableObject {
             let isDir = (try? u.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
             if isDir {
                 guard depth < 8, !skipDirs.contains(u.lastPathComponent) else { continue }
-                let ch = build(u, depth: depth + 1, budget: &budget, keepEmpty: keepEmpty)
+                let ch = build(u, depth: depth + 1, budget: &budget, keepEmpty: keepEmpty, order: order)
                 if !ch.isEmpty || keepEmpty {
                     dirs.append(FileNode(id: u.path, name: u.lastPathComponent, isDir: true, children: ch.isEmpty ? nil : ch))
                 }
@@ -567,6 +655,12 @@ final class ReaderModel: ObservableObject {
             }
         }
         let cmp: (FileNode, FileNode) -> Bool = { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-        return dirs.sorted(by: cmp) + files.sorted(by: cmp)
+        let byDefault = dirs.sorted(by: cmp) + files.sorted(by: cmp)
+        // порядок, заданный перетаскиванием; новые элементы идут в конец
+        guard let custom = order[dir.path], !custom.isEmpty else { return byDefault }
+        let index = Dictionary(custom.enumerated().map { ($1, $0) }, uniquingKeysWith: { a, _ in a })
+        return byDefault.enumerated()
+            .sorted { (index[$0.element.name] ?? custom.count + $0.offset) < (index[$1.element.name] ?? custom.count + $1.offset) }
+            .map(\.element)
     }
 }

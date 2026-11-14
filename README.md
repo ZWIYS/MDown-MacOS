@@ -1,122 +1,126 @@
 # MDown
 
-**Версия 1.4** · автор: Peter Plyuvkov & Claude
+**Version 1.5** · by Peter Plyuvkov & Claude · English | [Русский](README.ru.md)
 
-**MDown** — простое нативное приложение для macOS, чтобы читать, писать и раскладывать по разделам заметки в markdown. SwiftUI + WebKit, без сторонних зависимостей и без интернета.
+**MDown** is a simple native macOS app for reading, writing and organizing markdown notes in sections. Built with SwiftUI + WebKit, no third-party dependencies, no internet required.
 
-## Возможности
+> The app's interface is currently in Russian.
 
-### Библиотека заметок и разделы
-- При первом запуске создаётся основная папка **`~/Documents/MDown`**. Все заметки лежат в ней, а **подпапки — это разделы**. Это обычные файлы `.md`, их можно открыть в любом другом редакторе или синхронизировать через iCloud/git.
-- **Новая заметка** (⌘N) и **новый раздел** (⇧⌘N) сразу появляются в списке слева, и имя вводится прямо там, как в Finder: имя выделено, Enter применяет, Esc оставляет имя по умолчанию.
-- Создать можно через меню «Файл», кнопку «+» в заголовке папки или **правый клик (два пальца)** по списку. Правый клик по заметке или разделу даёт ещё «Переименовать», «Показать в Finder», «В Корзину».
-- Новое создаётся в выбранном разделе (или в разделе открытой заметки).
-- **Цветные метки.** Правый клик по заметке или разделу → «Цвет»: рядом с названием появляется цветная точка (как теги в Finder), а значок окрашивается. Заметки внутри цветного раздела наследуют его цвет, так что положили заметку в «синий» раздел — она тоже синяя. Собственный цвет заметки главнее.
-- Клик по любой части строки (в том числе по тексту) открывает заметку, клик по разделу раскрывает его.
-- **Открыть любой файл или папку вне библиотеки** — «Файл → Открыть…» (⌘O). Слева появится временная папка этого файла; её можно закрепить или закрыть (правый клик по заголовку).
+## Features
 
-### Настройки (⌘,)
-- **Основная папка** — любая папка вместо `Documents/MDown`.
-- **Дополнительные папки** — добавьте сколько нужно, все они показываются в боковой панели одновременно, с теми же разделами и созданием заметок.
-- **Цвет темы** — пастельный оттенок всего приложения (окно, боковая панель, заголовок, чтение и редактирование): лимон, мята, небо, розовый, сирень, персик (или без цвета). Работает и в светлой, и в тёмной теме (в тёмной оттенок приглушён).
+### Notes library and sections
+- On first launch MDown creates a main folder, **`~/Documents/MDown`**. All notes live there and **subfolders are sections**. They are plain `.md` files, so you can open them in any other editor or sync them with iCloud/git.
+- **New note** (⌘N) and **new section** (⇧⌘N) appear in the sidebar immediately and you name them right there, like in Finder: the name is selected, Enter confirms, Esc keeps the default.
+- Create from the File menu, the "+" button in a folder header, or by **right-clicking (two fingers)** the list. Right-clicking a note or section also offers Rename, Show in Finder, Color and Move to Trash.
+- **Drag and drop** in the sidebar: drag a note onto a section to move it there, or drop it between rows to reorder. Order is remembered. Dragging a section works the same way.
+- **Color labels.** Right-click → Color puts a Finder-style colored dot next to the name. Notes inside a colored section inherit its color, so drop a note into the "blue" section and it becomes blue. A note's own color wins.
+- Click anywhere on a row (including the text) to open it, click a section to expand it.
+- **Open any file or folder** outside the library with File → Open (⌘O). It appears as a temporary folder in the sidebar that you can pin or close (right-click its header).
 
-### Чтение и правка
-- **«Красиво» (⌘1)** — отрендеренный markdown. **«Исходник» (⌘2)** — сырой markdown.
-- **Карандаш (⌘E)** включает правку в обоих видах (в «Красиво» её также включает двойной клик по тексту):
-  - в «Красиво» кликните по абзацу, заголовку, списку или таблице — блок превратится в поле с исходником, пишите на месте. Esc, ⌘Enter или клик в другое место применяют правку. Клик по пустому месту под текстом добавляет новый блок;
-  - в «Исходнике» правится весь текст целиком (отмена, поиск ⌘F).
-- **Сплит** (кнопка в тулбаре, ⌥⌘E) — исходник слева, результат справа. Включает правку.
-- **Поиск ⌘F** — строка поиска в углу окна, работает и в «Красиво», и в «Исходнике» (Enter или ⌘G — следующее, ⇧Enter или ⇧⌘G — предыдущее, Esc закрывает).
-- **⌘Z / ⇧⌘Z** отменяют и повторяют правки и форматирование, в том числе в «Красиво».
-- Автосохранение: через 0,8 с после остановки печати, при переключении в другое приложение и при выходе (⌘S тоже есть).
+### Settings (⌘,)
+- **Main folder**: any folder instead of `Documents/MDown`.
+- **Extra folders**: add as many as you like. They all show in the sidebar at the same time, with the same sections, drag and drop and note creation.
+- **Theme color**: a pastel tint for the whole app (window, sidebar, title bar, reading and editing). Eight colors based on macOS system colors plus pink: red, orange, yellow, green, blue, purple, pink, gray, or no tint. In dark theme the tints are muted.
 
-### Форматирование по правому клику
-Выделите текст и кликните двумя пальцами — появится меню форматирования, и в «Красиво», и в «Исходнике»:
-- заголовок 1–3 или обычный текст, **жирный**, *курсив*, ~~зачёркнутый~~, `код`, цитата, список;
-- выделение цветом (шесть пастельных цветов, включая розовый) и «Убрать выделение»;
-- повторное применение жирного/курсива к уже отформатированному тексту снимает форматирование. В «Исходнике» работают ⌘B и ⌘I.
+### Reading and editing
+- **"Красиво" / pretty (⌘1)**: rendered markdown. **"Исходник" / source (⌘2)**: raw markdown.
+- **Pencil (⌘E)** turns editing on in both views (in pretty view a double click on the text also turns it on):
+  - in pretty view click a paragraph, heading, list or table and that block turns into a field with its source, so you type in place. Esc, ⌘Enter or a click elsewhere applies the edit. Clicking the empty space below the text adds a new block;
+  - in source view you edit the whole text (undo, native text editing).
+- **Split view** (toolbar button, ⌥⌘E): source on the left, result on the right. Turns editing on.
+- **Search ⌘F**: a search bar in the corner of the window, works in both views (Enter or ⌘G next, ⇧Enter or ⇧⌘G previous, Esc closes).
+- **⌘Z / ⇧⌘Z** undo and redo edits and formatting, including in pretty view.
+- Autosave: 0.8 s after you stop typing, when you switch to another app, and on quit (⌘S works too).
 
-Как хранится цвет:
-- в **«Красиво»** (когда правка выключена) цвет — отдельная разметка: выделения лежат в `~/Library/Application Support/MDown/highlights.json`, сам `.md` не меняется;
-- в **«Исходнике»** и в поле правки цвет записывается в текст как `<mark data-c="y">…</mark>` (GitHub показывает его как обычное выделение).
+### Formatting via right-click
+Select text and right-click (two fingers) to get a formatting menu, in both pretty and source views:
+- heading 1-3 or plain text, **bold**, *italic*, ~~strikethrough~~, `code`, quote, list;
+- highlight with one of eight pastel colors (the macOS palette plus pink) and "remove highlight";
+- applying bold or italic to already formatted text removes the formatting. ⌘B and ⌘I work in source view.
 
-### Внешний вид
-- **Размер текста** — щипок на трекпаде (текст перетекает, как в режиме чтения Safari), а также ⌘+, ⌘− и ⌘0.
-- **Тема** — «Как в системе», «Светлая», «Тёмная».
-- Относительные ссылки на другие `.md` открываются внутри приложения, картинки рядом с файлом показываются, внешние ссылки открываются в браузере.
+How highlights are stored:
+- in **pretty view** (editing off) highlights are stored separately, in `~/Library/Application Support/MDown/highlights.json`, and your `.md` stays untouched;
+- in **source view** and in the edit field a highlight is written into the text as `<mark data-c="y">…</mark>` (GitHub shows it as a plain highlight).
 
-Поддерживаемый markdown: заголовки, списки (вложенные, нумерованные, чекбоксы), таблицы с выравниванием, цитаты, блоки кода, ссылки (в том числе reference-style), картинки, `**жирный**`, `*курсив*`, `~~зачёркнутый~~`, `` `код` ``, горизонтальные линии, front matter (скрывается), `<mark>`, часть inline-HTML (`<kbd>`, `<br>`, `<details>` и т. п.). Не поддерживаются: сноски, подсветка синтаксиса, диаграммы.
+### Appearance
+- **Text size**: pinch on the trackpad (the text reflows like Safari's reader mode), or ⌘+, ⌘− and ⌘0.
+- **Theme**: follow the system, light or dark.
+- Relative links to other `.md` files open inside the app, images next to the file are shown, external links open in the browser.
 
-## Требования
+Supported markdown: headings, lists (nested, numbered, task lists), tables with alignment, quotes, code blocks, links (including reference-style), images, `**bold**`, `*italic*`, `~~strikethrough~~`, `` `code` ``, horizontal rules, front matter (hidden), `<mark>`, some inline HTML (`<kbd>`, `<br>`, `<details>`, etc). Not supported: footnotes, syntax highlighting, diagrams.
 
-- macOS 13 или новее
-- Swift 5.9+ (хватит Command Line Tools, Xcode не нужен): `xcode-select --install`
+## Requirements
 
-## Установка
+- macOS 13 or newer
+- Swift 5.9+ (Command Line Tools are enough, Xcode is not needed): `xcode-select --install`
+
+## Installation
 
 ```bash
-git clone https://github.com/<ваш-аккаунт>/MDown-MacOS.git
+git clone https://github.com/ZWIYS/MDown-MacOS.git
 cd MDown-MacOS
 ./install.sh
 ```
 
-Скрипт соберёт приложение и поставит его в `/Applications/MDown.app` (старую версию «MD Reader», если она была, он удалит). После этого MDown доступен в Launchpad и Spotlight; чтобы закрепить в Dock, запустите его и выберите в меню иконки «Параметры → Оставить в Dock».
+The script builds the app and installs it to `/Applications/MDown.app` (it also removes the old "MD Reader" if present). After that MDown is available in Launchpad and Spotlight. To keep it in the Dock, launch it and choose Options → Keep in Dock from the Dock icon menu.
 
-Приложение подписано ad-hoc (без сертификата разработчика). Если macOS не даёт его открыть, сделайте правый клик по приложению → «Открыть».
+The app is ad-hoc signed (no developer certificate). If macOS refuses to open it, right-click the app and choose Open.
 
-Только сборка, без установки:
+Build only, without installing:
 
 ```bash
-./build.sh          # создаст ./MDown.app
+./build.sh          # creates ./MDown.app
 open MDown.app
 ```
 
-Открыть конкретный файл при запуске:
+Open a specific file on launch:
 
 ```bash
-open MDown.app --args /путь/к/файлу.md
+open MDown.app --args /path/to/file.md
 ```
 
-## Структура проекта
+## Project structure
 
 ```
-Package.swift            SwiftPM-манифест (один исполняемый таргет MDown)
-Info.plist               метаданные .app, иконка, привязка к .md
-build.sh                 swift build + упаковка в MDown.app + ad-hoc подпись
-install.sh               build.sh + копирование в /Applications
-Resources/AppIcon.icns   иконка приложения
-tools/make_icon.swift    скрипт, рисующий иконку 1024×1024 (swift tools/make_icon.swift out.png)
-sample/                  примеры markdown-файлов для проверки
+Package.swift            SwiftPM manifest (one executable target, MDown)
+Info.plist               .app metadata, icon, .md association, version
+build.sh                 swift build + packaging into MDown.app + ad-hoc signing
+install.sh               build.sh + copy to /Applications
+Resources/AppIcon.icns   app icon
+tools/make_icon.swift    script that draws the 1024x1024 icon (swift tools/make_icon.swift out.png)
+sample/                  sample markdown files for testing
 Sources/MDown/
-  App.swift              точка входа, меню «Файл» и «Вид», горячие клавиши, окно настроек
-  ContentView.swift      окно: тулбар, раскладка (вид/сплит), боковая панель, переименование на месте
-  SettingsView.swift     настройки: основная и дополнительные папки, цвет темы
-  Model.swift            состояние: корневые папки, разделы, файлы, тема, цвет, сохранение, выделения
-  EditorView.swift       вид «Исходник» на NSTextView + меню форматирования, ⌘B/⌘I
-  WebView.swift          WKWebView: щипок-масштаб, ссылки, локальные картинки, связь страницы с приложением
-  Template.swift         HTML/CSS и встроенный JS: парсер markdown, правка блоков, меню форматирования, выделения
+  App.swift              entry point, File and View menus, shortcuts, settings window
+  ContentView.swift      window: toolbar, layout (view/split), search bar, sidebar, drag and drop, inline rename
+  SettingsView.swift     settings: main and extra folders, theme color
+  Model.swift            state: root folders, sections, files, ordering, labels, palette, saving, highlights
+  EditorView.swift       "source" view on NSTextView + formatting menu, ⌘B/⌘I
+  WebView.swift          WKWebView: pinch zoom, links, local images, page <-> app bridge
+  Template.swift         HTML/CSS and embedded JS: markdown parser, block editing, formatting menu, highlights, undo
 ```
 
-## Как это устроено
+## How it works
 
-- **Рендер.** Markdown превращается в HTML встроенным небольшим парсером на JavaScript ([Template.swift](Sources/MDown/Template.swift)) и показывается в `WKWebView`. Тема следует системной через `prefers-color-scheme`, тема приложения задаётся через `preferredColorScheme`, оттенок фона — CSS-переменными `--bg-l` / `--bg-d`.
-- **Правка на месте.** Парсер запоминает для каждого блока верхнего уровня диапазон строк исходника. Клик по блоку подменяет его на `<textarea>`, а при завершении правки диапазон заменяется новым текстом, страница перерисовывается, и полный текст уходит в приложение через `WKScriptMessageHandler` и сохраняется в файл.
-- **Форматирование.** В «Красиво» выделенный фрагмент ищется в исходнике соответствующего блока (с учётом номера вхождения) и оборачивается в маркеры; если найти точно не удалось (например, выделение пересекает ссылку), показывается подсказка. В «Исходнике» меню добавляется в `NSTextView` (`menu(for:)`).
-- **Масштаб.** Щипок перехватывается в подклассе `WKWebView` (`magnify(with:)`) и меняет `pageZoom`, поэтому текст перетекает.
-- **Локальные файлы.** Страница грузится с базой `mdlocal://doc/<путь к папке>/`, а `WKURLSchemeHandler` отдаёт файлы с диска, поэтому относительные пути к картинкам работают.
-- **Выделения.** Хранятся как смещения в тексте страницы плюс сам фрагмент. При изменении документа смещения перепривязываются поиском фрагмента; при переименовании файла или раздела выделения переезжают вместе с ним.
-- **Дерево.** Основная и дополнительные папки показывают все разделы (и пустые), плюс файлы `md`, `markdown`, `mdown`, `mdx`. Временные папки — только то, где есть markdown. Служебные папки (`.git`, `node_modules` и т. п.) скрыты.
+- **Rendering.** Markdown is converted to HTML by a small built-in JavaScript parser ([Template.swift](Sources/MDown/Template.swift)) and shown in a `WKWebView`. The theme follows the system via `prefers-color-scheme`, the app theme is set through `preferredColorScheme`, and the tint through the CSS variables `--bg-l` / `--bg-d`.
+- **Palette.** One `Pastel` enum in [Model.swift](Sources/MDown/Model.swift) defines the eight colors and is used for the theme tint, text highlights and color labels.
+- **In-place editing.** The parser remembers the source line range of every top-level block. Clicking a block swaps it for a `<textarea>`; when you finish, that range is replaced with the new text, the page is redrawn, and the full text is sent to the app through a `WKScriptMessageHandler` and saved to the file. Page-level undo/redo keeps a history of the document text.
+- **Formatting.** In pretty view the selected fragment is found in the source of its block (taking the occurrence number into account) and wrapped in markers; if it can't be located exactly (for example the selection crosses a link) a hint is shown. In source view the menu is added to `NSTextView` (`menu(for:)`).
+- **Ordering and moving.** Drag and drop moves files on disk; the order within a folder is stored in the app's preferences (the file system has no order), and new items go to the end.
+- **Zoom.** A pinch is caught in a `WKWebView` subclass (`magnify(with:)`) and changes `pageZoom`, so the text reflows.
+- **Local files.** The page is loaded with the base `mdlocal://doc/<folder path>/` and a `WKURLSchemeHandler` serves files from disk, so relative image paths work.
+- **Highlights.** Stored as offsets in the page text plus the fragment itself. When the document changes the offsets are re-anchored by searching for the fragment; renaming or moving a file or section moves its highlights along.
 
-## Известные ограничения
+## Known limitations
 
-- Парсер markdown упрощённый, не полностью соответствует CommonMark.
-- Правка на месте работает блоками верхнего уровня: список или таблица редактируются целиком.
-- Форматирование в «Красиво» применяется к выделению внутри одного блока; выделение через несколько абзацев меню форматирования не открывает.
-- Автосохранение пишет прямо в файл, без запроса подтверждения (удалённое уходит в Корзину).
-- Выделения «Красиво» привязаны к пути файла: если переименовать или переместить файл вне приложения, они потеряются.
+- The markdown parser is simplified and not fully CommonMark compliant.
+- In-place editing works on top-level blocks: a list or table is edited as a whole.
+- In pretty view, formatting applies to a selection inside a single block; a selection spanning several paragraphs does not open the formatting menu.
+- Autosave writes straight to the file without asking (deleted items go to the Trash).
+- Pretty-view highlights are tied to the file path: if you rename or move a file outside the app, they are lost.
+- The interface language is Russian only for now.
 
-## Лицензия
+## License
 
-MIT, см. [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
 
 © Peter Plyuvkov & Claude

@@ -2,24 +2,29 @@ import Foundation
 
 enum Template {
     static func html(markdown: String, highlights: String = "[]", tint: Tint = .none) -> String {
+        let colorsJSON = "[" + Pastel.allCases.map { "\"\($0.rawValue)\"" }.joined(separator: ",") + "]"
         let data = (try? JSONSerialization.data(withJSONObject: markdown, options: [.fragmentsAllowed])) ?? Data("\"\"".utf8)
         let json = String(decoding: data, as: UTF8.self).replacingOccurrences(of: "</", with: "<\\/")
         return """
         <!doctype html><html><head><meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>\(css)</style><style>:root{--bg-l:\(tint.lightHex);--bg-d:\(tint.darkHex)}</style></head><body><main id="c"></main>
-        <script>let MD=\(json);const HLDATA=\(highlights.replacingOccurrences(of: "</", with: "<\\/"));const SOURCE=false;\(js)</script></body></html>
+        <style>\(css)\(paletteCSS)</style><style>:root{--bg-l:\(tint.lightHex);--bg-d:\(tint.darkHex)}</style></head><body><main id="c"></main>
+        <script>let MD=\(json);const COLORS=\(colorsJSON);const HLDATA=\(highlights.replacingOccurrences(of: "</", with: "<\\/"));const SOURCE=false;\(js)</script></body></html>
         """
+    }
+
+    /// Цвета маркера из единой палитры (Pastel).
+    static var paletteCSS: String {
+        let light = Pastel.allCases.map { "--hl-\($0.rawValue):\($0.hlLight)" }.joined(separator: ";")
+        let dark = Pastel.allCases.map { "--hl-\($0.rawValue):\($0.hlDark)" }.joined(separator: ";")
+        let marks = Pastel.allCases.map { "mark.c-\($0.rawValue){background:var(--hl-\($0.rawValue))}" }.joined()
+        return ":root{\(light)}@media (prefers-color-scheme:dark){:root{\(dark)}}\(marks)"
     }
 
     static let css = #"""
     :root{color-scheme:light dark;--bg-l:#fff;--bg-d:#1e1e1e;--bg:var(--bg-l);--fg:#1d1d1f;--sub:#6e6e73;--line:#d2d2d7;--code:#f5f5f7;--accent:#0066cc}
     @media (prefers-color-scheme:dark){:root{--bg:var(--bg-d);--fg:#f5f5f7;--sub:#98989d;--line:#3a3a3c;--code:#2c2c2e;--accent:#2997ff}}
-    :root{--hl-y:#fff1a8;--hl-g:#cdeec8;--hl-b:#c4e3ff;--hl-p:#ffd3e2;--hl-v:#e2d6ff;--hl-o:#ffdcb9}
-    @media (prefers-color-scheme:dark){:root{--hl-y:rgba(255,214,10,.30);--hl-g:rgba(52,199,89,.30);--hl-b:rgba(10,132,255,.38);--hl-p:rgba(255,55,95,.32);--hl-v:rgba(175,130,255,.40);--hl-o:rgba(255,159,10,.34)}}
     mark.hl{color:inherit;border-radius:.2em;padding:.06em 0;cursor:pointer;-webkit-box-decoration-break:clone;box-decoration-break:clone}
-    mark.c-y{background:var(--hl-y)}mark.c-g{background:var(--hl-g)}mark.c-b{background:var(--hl-b)}
-    mark.c-p{background:var(--hl-p)}mark.c-v{background:var(--hl-v)}mark.c-o{background:var(--hl-o)}
     #pal{position:absolute;z-index:10;display:none;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:var(--bg);border:1px solid var(--line);box-shadow:0 6px 24px rgba(0,0,0,.2);-webkit-user-select:none}
     #pal.show{display:flex}
     #pal button{width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.14);padding:0;cursor:pointer}
@@ -77,7 +82,7 @@ enum Template {
       s=s.replace(/(`+)([\s\S]*?[^`])\1(?!`)/g,(m,a,c)=>{codes.push('<code>'+esc(c.trim())+'</code>');return '\u0000'+(codes.length-1)+'\u0000'});
       s=esc(s);
       s=s.replace(/&lt;(\/?(?:kbd|sup|sub|b|i|em|strong|u|del|ins|small)|br\s*\/?)&gt;/gi,'<$1>');
-      s=s.replace(/&lt;mark(?: data-c="([ygbpvo])")?&gt;/gi,(m,c)=>`<mark class="c-${c||'y'}">`).replace(/&lt;\/mark&gt;/gi,'</mark>');
+      s=s.replace(/&lt;mark(?: data-c="([roygbvpx])")?&gt;/gi,(m,c)=>`<mark class="c-${c||'y'}">`).replace(/&lt;\/mark&gt;/gi,'</mark>');
       s=s.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g,(m,a,u,t)=>`<img alt="${a}" src="${u}"${t?` title="${t}"`:''}>`);
       s=s.replace(/\[([^\]]+)\]\[([^\]]*)\]/g,(m,t,r)=>refs[(r||t).toLowerCase()]?`<a href="${refs[(r||t).toLowerCase()]}">${t}</a>`:m);
       s=s.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g,(m,a,u)=>`<a href="${u}">${a}</a>`);
@@ -199,7 +204,6 @@ enum Template {
     let HL=HLDATA||[];
     let EDITING=false,editEl=null,editOrig=null;
     MD=MD.replace(/\r\n?/g,'\n');
-    const COLORS=['y','g','b','p','v','o'];
     const post=()=>{try{window.webkit.messageHandlers.hl.postMessage(JSON.stringify(HL))}catch(e){}};
 
     /* ---------- выделения цветом ---------- */
