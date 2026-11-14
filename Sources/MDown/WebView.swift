@@ -59,6 +59,7 @@ struct MarkdownWebView: NSViewRepresentable {
         let model: ReaderModel
         weak var webView: WKWebView?
         private var loadedPath = ""
+        private var loadedRussian = L10n.isRussian
         private var embeddedText = ""
         private var pushedText = ""
         private var appliedEditing: String?
@@ -68,8 +69,9 @@ struct MarkdownWebView: NSViewRepresentable {
         func sync(_ view: WKWebView) {
             if view.pageZoom != model.zoom { view.pageZoom = model.zoom }
             guard let file = model.fileURL else { return }
-            if file.path != loadedPath {
+            if file.path != loadedPath || loadedRussian != L10n.isRussian {
                 loadedPath = file.path
+                loadedRussian = L10n.isRussian
                 embeddedText = model.text
                 pushedText = model.text
                 appliedEditing = nil

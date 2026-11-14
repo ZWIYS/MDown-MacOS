@@ -3,13 +3,21 @@ import Foundation
 enum Template {
     static func html(markdown: String, highlights: String = "[]", tint: Tint = .none) -> String {
         let colorsJSON = "[" + Pastel.allCases.map { "\"\($0.rawValue)\"" }.joined(separator: ",") + "]"
+        let strings: [String: String] = [
+            "heading": tr("Heading"), "plain": tr("Plain Text"), "bold": tr("Bold"), "italic": tr("Italic"),
+            "strike": tr("Strikethrough"), "code": tr("Code"), "quote": tr("Quote"), "list": tr("List"),
+            "highlight": tr("Highlight Color"), "removeHL": tr("Remove Highlight"), "writeHere": tr("Write here…"),
+            "notFound": tr("Couldn't find this spot in the source. Select text inside a single paragraph without formatting, or turn editing on."),
+        ]
+        let tJSON = String(decoding: (try? JSONSerialization.data(withJSONObject: strings)) ?? Data("{}".utf8), as: UTF8.self)
+            .replacingOccurrences(of: "</", with: "<\\/")
         let data = (try? JSONSerialization.data(withJSONObject: markdown, options: [.fragmentsAllowed])) ?? Data("\"\"".utf8)
         let json = String(decoding: data, as: UTF8.self).replacingOccurrences(of: "</", with: "<\\/")
         return """
         <!doctype html><html><head><meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>\(css)\(paletteCSS)</style><style>:root{--bg-l:\(tint.lightHex);--bg-d:\(tint.darkHex)}</style></head><body><main id="c"></main>
-        <script>let MD=\(json);const COLORS=\(colorsJSON);const HLDATA=\(highlights.replacingOccurrences(of: "</", with: "<\\/"));const SOURCE=false;\(js)</script></body></html>
+        <script>let MD=\(json);const T=\(tJSON);const COLORS=\(colorsJSON);const HLDATA=\(highlights.replacingOccurrences(of: "</", with: "<\\/"));const SOURCE=false;\(js)</script></body></html>
         """
     }
 
@@ -18,7 +26,8 @@ enum Template {
         let light = Pastel.allCases.map { "--hl-\($0.rawValue):\($0.hlLight)" }.joined(separator: ";")
         let dark = Pastel.allCases.map { "--hl-\($0.rawValue):\($0.hlDark)" }.joined(separator: ";")
         let marks = Pastel.allCases.map { "mark.c-\($0.rawValue){background:var(--hl-\($0.rawValue))}" }.joined()
-        return ":root{\(light)}@media (prefers-color-scheme:dark){:root{\(dark)}}\(marks)"
+        let hint = "body.editing #tail:empty::before{content:\"\(tr("Click to write…"))\";color:var(--sub);opacity:.6}"
+        return ":root{\(light)}@media (prefers-color-scheme:dark){:root{\(dark)}}\(marks)\(hint)"
     }
 
     static let css = #"""
@@ -71,7 +80,6 @@ enum Template {
     textarea.ed{display:block;width:100%;margin:.6em 0;padding:12px 14px;font:.9em/1.55 ui-monospace,"SF Mono",Menlo,monospace;color:var(--fg);background:var(--code);border:1.5px solid var(--accent);border-radius:10px;resize:none;outline:none;overflow:hidden}
     #tail{min-height:34vh}
     body.editing #tail{cursor:text}
-    body.editing #tail:empty::before{content:"Нажмите, чтобы писать…";color:var(--sub);opacity:.6}
     """#
 
     static let js = #"""
@@ -250,7 +258,7 @@ enum Template {
     window.updateMD=function(md){MD=md.replace(/\r\n?/g,'\n');undoS.length=0;redoS.length=0;const y=scrollY;for(const k in refs)delete refs[k];hidePal();editEl=null;draw();scrollTo(0,y);};
 
     const pal=document.createElement('div');pal.id='pal';
-    pal.innerHTML=COLORS.map(c=>`<button data-c="${c}" style="background:var(--hl-${c})"></button>`).join('')+'<button class="x" title="Убрать выделение">✕</button>';
+    pal.innerHTML=COLORS.map(c=>`<button data-c="${c}" style="background:var(--hl-${c})"></button>`).join('')+'<button class="x" title="'+T.removeHL+'">✕</button>';
     document.body.appendChild(pal);
     let target=null,pend=null;
     function hidePal(){pal.classList.remove('show');}
@@ -307,7 +315,7 @@ enum Template {
       blk.replaceWith(ta);beginEdit(ta,blk);
     }
     function startAppend(){
-      const ta=document.createElement('textarea');ta.className='ed';ta.dataset.append='1';ta.placeholder='Пишите здесь…';
+      const ta=document.createElement('textarea');ta.className='ed';ta.dataset.append='1';ta.placeholder=T.writeHere;
       const tail=document.getElementById('tail');tail.parentNode.insertBefore(ta,tail);beginEdit(ta,null);
     }
     function commitEdit(ta){
@@ -423,11 +431,11 @@ enum Template {
     }
 
     const fm=document.createElement('div');fm.id='fmenu';
-    fm.innerHTML='<div class="row lbl">Заголовок</div>'
-     +'<div class="row"><button data-k="h0" title="Обычный текст">Т</button><button data-k="h1">H1</button><button data-k="h2">H2</button><button data-k="h3">H3</button></div>'
-     +'<div class="row"><button data-k="b" title="Жирный"><b>B</b></button><button data-k="i" title="Курсив"><i>I</i></button><button data-k="s" title="Зачёркнутый"><s>S</s></button><button data-k="code" title="Код">&lt;/&gt;</button><button data-k="quote" title="Цитата">❝</button><button data-k="ul" title="Список">•</button></div>'
-     +'<div class="row lbl">Выделить цветом</div>'
-     +'<div class="row">'+COLORS.map(c=>`<button class="dot" data-c="${c}" style="background:var(--hl-${c})"></button>`).join('')+'<button class="xb" data-k="x" title="Убрать выделение">✕</button></div>';
+    fm.innerHTML='<div class="row lbl">'+T.heading+'</div>'
+     +'<div class="row"><button data-k="h0" title="'+T.plain+'">T</button><button data-k="h1">H1</button><button data-k="h2">H2</button><button data-k="h3">H3</button></div>'
+     +'<div class="row"><button data-k="b" title="'+T.bold+'"><b>B</b></button><button data-k="i" title="'+T.italic+'"><i>I</i></button><button data-k="s" title="'+T.strike+'"><s>S</s></button><button data-k="code" title="'+T.code+'">&lt;/&gt;</button><button data-k="quote" title="'+T.quote+'">❝</button><button data-k="ul" title="'+T.list+'">•</button></div>'
+     +'<div class="row lbl">'+T.highlight+'</div>'
+     +'<div class="row">'+COLORS.map(c=>`<button class="dot" data-c="${c}" style="background:var(--hl-${c})"></button>`).join('')+'<button class="xb" data-k="x" title="'+T.removeHL+'">✕</button></div>';
     document.body.appendChild(fm);
     let fctx=null;
     function hideF(){fm.classList.remove('show');fctx=null;}
@@ -482,7 +490,7 @@ enum Template {
       let pos=-1;for(let j=0;j<=n;j++){pos=body.indexOf(c.text,pos+1);if(pos<0)break;}
       let a,b;
       if(pos<0){
-        if(['b','i','s','code'].includes(k)){toast('Не нашёл это место в исходнике. Выделите текст внутри одного абзаца без форматирования или включите правку.');return;}
+        if(['b','i','s','code'].includes(k)){toast(T.notFound);return;}
         a=b=0;
       }else{a=pos;b=pos+c.text.length;}
       const r=fmtText(body,a,b,k); if(!r) return;

@@ -1,10 +1,8 @@
 # MDown
 
-**Version 1.5** · by Peter Plyuvkov & Claude · English | [Русский](README.ru.md)
+**Version 1.7** · by Peter Plyuvkov & Claude · English | [Русский](README.ru.md)
 
 **MDown** is a simple native macOS app for reading, writing and organizing markdown notes in sections. Built with SwiftUI + WebKit, no third-party dependencies, no internet required.
-
-> The app's interface is currently in Russian.
 
 ## Features
 
@@ -17,13 +15,20 @@
 - Click anywhere on a row (including the text) to open it, click a section to expand it.
 - **Open any file or folder** outside the library with File → Open (⌘O). It appears as a temporary folder in the sidebar that you can pin or close (right-click its header).
 
+### Language
+- The interface is available in **English** and **Russian**.
+- On first launch the language is picked from the system (Russian if the system language is Russian, otherwise English). You can change it any time in Settings.
+- The app's own UI switches immediately; system menus (Edit, Window) switch after a restart.
+- The welcome note created on first launch follows the same rule (`Welcome.md` or `Добро пожаловать.md`).
+
 ### Settings (⌘,)
+- **Language**: English or Russian.
 - **Main folder**: any folder instead of `Documents/MDown`.
 - **Extra folders**: add as many as you like. They all show in the sidebar at the same time, with the same sections, drag and drop and note creation.
 - **Theme color**: a pastel tint for the whole app (window, sidebar, title bar, reading and editing). Eight colors based on macOS system colors plus pink: red, orange, yellow, green, blue, purple, pink, gray, or no tint. In dark theme the tints are muted.
 
 ### Reading and editing
-- **"Красиво" / pretty (⌘1)**: rendered markdown. **"Исходник" / source (⌘2)**: raw markdown.
+- **Pretty (⌘1)**: rendered markdown. **Source (⌘2)**: raw markdown.
 - **Pencil (⌘E)** turns editing on in both views (in pretty view a double click on the text also turns it on):
   - in pretty view click a paragraph, heading, list or table and that block turns into a field with its source, so you type in place. Esc, ⌘Enter or a click elsewhere applies the edit. Clicking the empty space below the text adds a new block;
   - in source view you edit the whole text (undo, native text editing).
@@ -87,12 +92,14 @@ Info.plist               .app metadata, icon, .md association, version
 build.sh                 swift build + packaging into MDown.app + ad-hoc signing
 install.sh               build.sh + copy to /Applications
 Resources/AppIcon.icns   app icon
+Resources/*.lproj        language declarations (en, ru) so system menus are localized
 tools/make_icon.swift    script that draws the 1024x1024 icon (swift tools/make_icon.swift out.png)
 sample/                  sample markdown files for testing
 Sources/MDown/
   App.swift              entry point, File and View menus, shortcuts, settings window
   ContentView.swift      window: toolbar, layout (view/split), search bar, sidebar, drag and drop, inline rename
-  SettingsView.swift     settings: main and extra folders, theme color
+  SettingsView.swift     settings: language, main and extra folders, theme color
+  Localization.swift     English/Russian strings: tr("English text") returns the Russian translation when needed
   Model.swift            state: root folders, sections, files, ordering, labels, palette, saving, highlights
   EditorView.swift       "source" view on NSTextView + formatting menu, ⌘B/⌘I
   WebView.swift          WKWebView: pinch zoom, links, local images, page <-> app bridge
@@ -117,7 +124,7 @@ Sources/MDown/
 - In pretty view, formatting applies to a selection inside a single block; a selection spanning several paragraphs does not open the formatting menu.
 - Autosave writes straight to the file without asking (deleted items go to the Trash).
 - Pretty-view highlights are tied to the file path: if you rename or move a file outside the app, they are lost.
-- The interface language is Russian only for now.
+- Only English and Russian are available; other system languages start in English. New languages are added by extending the table in `Localization.swift`.
 
 ## License
 

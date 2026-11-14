@@ -1,0 +1,4 @@
+.build/
+MDown.app/
+.DS_Store
+*.o

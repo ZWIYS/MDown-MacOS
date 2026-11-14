@@ -34,45 +34,45 @@ struct ContentView: View {
             .navigationSubtitle(model.fileURL?.deletingLastPathComponent().lastPathComponent ?? "")
             .toolbar {
                 ToolbarItemGroup {
-                    Picker("Вид", selection: $model.mode) {
-                        Label("Красиво", systemImage: "doc.richtext").tag(ReadMode.rendered)
-                        Label("Исходник", systemImage: "chevron.left.forwardslash.chevron.right").tag(ReadMode.source)
+                    Picker(tr("View"), selection: $model.mode) {
+                        Label(tr("Pretty"), systemImage: "doc.richtext").tag(ReadMode.rendered)
+                        Label(tr("Source"), systemImage: "chevron.left.forwardslash.chevron.right").tag(ReadMode.source)
                     }
                     .pickerStyle(.segmented)
-                    .help("Красивое отображение или сырой markdown (⌘1 / ⌘2)")
+                    .help(tr("Pretty view or raw markdown (⌘1 / ⌘2)"))
                     .disabled(model.split)
 
                     Toggle(isOn: $model.split) {
-                        Label("Сплит", systemImage: "rectangle.split.2x1")
+                        Label(tr("Split"), systemImage: "rectangle.split.2x1")
                     }
                     .toggleStyle(.button)
-                    .help("Исходник и результат рядом (⌥⌘E)")
+                    .help(tr("Source and result side by side (⌥⌘E)"))
 
                     Toggle(isOn: $model.editing) {
-                        Label("Править", systemImage: model.editing ? "pencil.circle.fill" : "pencil.circle")
+                        Label(tr("Edit"), systemImage: model.editing ? "pencil.circle.fill" : "pencil.circle")
                     }
                     .toggleStyle(.button)
                     .help(model.editing
-                          ? "Правка включена (⌘E). В «Красиво» кликните по абзацу, в «Исходнике» печатайте"
-                          : "Включить правку (⌘E) или дважды кликните по тексту")
+                          ? tr("Editing is on (⌘E). In Pretty view click a paragraph, in Source just type")
+                          : tr("Turn editing on (⌘E) or double-click the text"))
 
                     Menu {
-                        Button("Увеличить") { model.zoomIn() }
-                        Button("Уменьшить") { model.zoomOut() }
-                        Button("Реальный размер") { model.zoomReset() }
+                        Button(tr("Increase")) { model.zoomIn() }
+                        Button(tr("Decrease")) { model.zoomOut() }
+                        Button(tr("Actual Size")) { model.zoomReset() }
                     } label: {
-                        Label("Размер текста", systemImage: "textformat.size")
+                        Label(tr("Text Size"), systemImage: "textformat.size")
                     }
-                    .help("Размер текста (⌘+ / ⌘− или щипок на трекпаде)")
+                    .help(tr("Text size (⌘+ / ⌘− or pinch on the trackpad)"))
 
                     Menu {
-                        Picker("Тема", selection: $model.theme) {
+                        Picker(tr("Theme"), selection: $model.theme) {
                             ForEach(AppTheme.allCases, id: \.self) { Label($0.title, systemImage: $0.icon).tag($0) }
                         }.pickerStyle(.inline)
                     } label: {
-                        Label("Тема", systemImage: model.theme.icon)
+                        Label(tr("Theme"), systemImage: model.theme.icon)
                     }
-                    .help("Светлая / тёмная тема (цвет — в настройках ⌘,)")
+                    .help(tr("Light / dark theme (color is in Settings ⌘,)"))
                 }
             }
         }
@@ -94,11 +94,11 @@ struct ContentView: View {
         if model.fileURL == nil {
             VStack(spacing: 14) {
                 Image(systemName: "doc.text").font(.system(size: 44)).foregroundStyle(.secondary)
-                Text("Выберите заметку слева или создайте новую").font(.title3)
+                Text(tr("Select a note on the left or create a new one")).font(.title3)
                 HStack {
-                    Button("Новая заметка") { model.createNote() }
-                    Button("Новый раздел") { model.createSection() }
-                    Button("Открыть файл…") { model.openPanel() }
+                    Button(tr("New Note")) { model.createNote() }
+                    Button(tr("New Section")) { model.createSection() }
+                    Button(tr("Open File…")) { model.openPanel() }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -126,7 +126,7 @@ struct SidebarView: View {
                 Section {
                     ForEach(root.tree) { NodeView(node: $0) }
                     if root.tree.isEmpty {
-                        Text("Пусто. Правый клик или «+», чтобы создать заметку или раздел.")
+                        Text(tr("Empty. Right-click or “+” to create a note or section."))
                             .font(.caption).foregroundStyle(.tertiary)
                     }
                 } header: {
@@ -138,8 +138,8 @@ struct SidebarView: View {
         .scrollContentBackground(.hidden)
         .background { Color(nsColor: model.tint.sidebarColor).ignoresSafeArea() }
         .contextMenu {   // правый клик / два пальца по пустому месту списка
-            Button("Новая заметка") { model.createNote(in: model.mainURL) }
-            Button("Новый раздел") { model.createSection(in: model.mainURL) }
+            Button(tr("New Note")) { model.createNote(in: model.mainURL) }
+            Button(tr("New Section")) { model.createSection(in: model.mainURL) }
         }
         .onChange(of: model.selection) { path in
             guard let path, !ReaderModel.isDirectory(path) else { return }
@@ -158,15 +158,15 @@ struct RootHeader: View {
             Text(root.url.lastPathComponent).lineLimit(1)
             Spacer()
             Menu {
-                Button("Новая заметка") { model.createNote(in: root.url) }
-                Button("Новый раздел") { model.createSection(in: root.url) }
+                Button(tr("New Note")) { model.createNote(in: root.url) }
+                Button(tr("New Section")) { model.createSection(in: root.url) }
             } label: {
                 Image(systemName: "plus")
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)      // без лишних стрелок
             .fixedSize()
-            .help("Новая заметка или раздел в «\(root.url.lastPathComponent)»")
+            .help(trf("New note or section in “%@”", root.url.lastPathComponent))
         }
         .contentShape(Rectangle())
         .onDrop(of: [.plainText], isTargeted: nil) { providers in
@@ -178,15 +178,15 @@ struct RootHeader: View {
             return true
         }
         .contextMenu {
-            Button("Новая заметка") { model.createNote(in: root.url) }
-            Button("Новый раздел") { model.createSection(in: root.url) }
+            Button(tr("New Note")) { model.createNote(in: root.url) }
+            Button(tr("New Section")) { model.createSection(in: root.url) }
             Divider()
-            Button("Показать в Finder") { model.reveal(root.url.path) }
+            Button(tr("Show in Finder")) { model.reveal(root.url.path) }
             switch root.kind {
-            case .extra: Button("Убрать из списка") { model.removeExtraFolder(root.url) }
+            case .extra: Button(tr("Remove from List")) { model.removeExtraFolder(root.url) }
             case .temp:
-                Button("Закрепить папку") { model.pinTempFolder() }
-                Button("Закрыть") { model.closeTempFolder() }
+                Button(tr("Pin Folder")) { model.pinTempFolder() }
+                Button(tr("Close")) { model.closeTempFolder() }
             case .main: EmptyView()
             }
         }
@@ -330,11 +330,11 @@ struct NodeRow: View {
         .onDrop(of: [.plainText], delegate: RowDropDelegate(model: model, node: node, height: height, hover: $hover))
         .contextMenu {
             if node.isDir {
-                Button("Новая заметка здесь") { model.createNote(in: URL(fileURLWithPath: node.id)) }
-                Button("Новый раздел внутри") { model.createSection(in: URL(fileURLWithPath: node.id)) }
+                Button(tr("New Note Here")) { model.createNote(in: URL(fileURLWithPath: node.id)) }
+                Button(tr("New Section Inside")) { model.createSection(in: URL(fileURLWithPath: node.id)) }
                 Divider()
             }
-            Menu("Цвет") {
+            Menu(tr("Color")) {
                 ForEach(Pastel.allCases, id: \.self) { t in
                     Button { model.setLabel(node.id, t) } label: {
                         Label {
@@ -345,12 +345,12 @@ struct NodeRow: View {
                     }
                 }
                 Divider()
-                Button("Без цвета") { model.setLabel(node.id, nil) }
+                Button(tr("No Color")) { model.setLabel(node.id, nil) }
             }
-            Button("Переименовать") { model.beginRename(node.id) }
-            Button("Показать в Finder") { model.reveal(node.id) }
+            Button(tr("Rename")) { model.beginRename(node.id) }
+            Button(tr("Show in Finder")) { model.reveal(node.id) }
             Divider()
-            Button("В Корзину") { model.trash(node.id) }
+            Button(tr("Move to Trash")) { model.trash(node.id) }
         }
     }
 }
@@ -393,7 +393,7 @@ struct SearchBar: View {
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-            TextField("Найти", text: $model.searchText)
+            TextField(tr("Find"), text: $model.searchText)
                 .textFieldStyle(.plain)
                 .frame(width: 190)
                 .focused($focused)
@@ -403,13 +403,13 @@ struct SearchBar: View {
             Button { model.find(backwards: true) } label: { Image(systemName: "chevron.up") }
                 .buttonStyle(.borderless)
                 .keyboardShortcut(.return, modifiers: .shift)
-                .help("Предыдущее (⇧⌘G)")
+                .help(tr("Previous (⇧⌘G)"))
             Button { model.find() } label: { Image(systemName: "chevron.down") }
                 .buttonStyle(.borderless)
-                .help("Следующее (⌘G, Enter)")
+                .help(tr("Next (⌘G, Enter)"))
             Button { model.closeSearch() } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }
                 .buttonStyle(.borderless)
-                .help("Закрыть (Esc)")
+                .help(tr("Close (Esc)"))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 7)

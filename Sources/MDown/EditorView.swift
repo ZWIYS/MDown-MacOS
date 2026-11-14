@@ -15,20 +15,20 @@ final class FormattingTextView: NSTextView {
         let menu = NSMenu()
 
         let heading = NSMenu()
-        for (key, title) in [("h0", "Обычный текст"), ("h1", "Заголовок 1"), ("h2", "Заголовок 2"), ("h3", "Заголовок 3")] {
+        for (key, title) in [("h0", tr("Plain Text")), ("h1", tr("Heading 1")), ("h2", tr("Heading 2")), ("h3", tr("Heading 3"))] {
             heading.addItem(item(title, key))
         }
-        let headingItem = NSMenuItem(title: "Заголовок", action: nil, keyEquivalent: "")
+        let headingItem = NSMenuItem(title: tr("Heading"), action: nil, keyEquivalent: "")
         headingItem.submenu = heading
         menu.addItem(headingItem)
 
-        menu.addItem(item("Жирный", "b", keyEquivalent: "b"))
-        menu.addItem(item("Курсив", "i", keyEquivalent: "i"))
-        menu.addItem(item("Зачёркнутый", "s"))
-        menu.addItem(item("Код", "code"))
+        menu.addItem(item(tr("Bold"), "b", keyEquivalent: "b"))
+        menu.addItem(item(tr("Italic"), "i", keyEquivalent: "i"))
+        menu.addItem(item(tr("Strikethrough"), "s"))
+        menu.addItem(item(tr("Code"), "code"))
         menu.addItem(.separator())
-        menu.addItem(item("Цитата", "quote"))
-        menu.addItem(item("Маркированный список", "ul"))
+        menu.addItem(item(tr("Quote"), "quote"))
+        menu.addItem(item(tr("Bulleted List"), "ul"))
         menu.addItem(.separator())
 
         let marks = NSMenu()
@@ -37,10 +37,10 @@ final class FormattingTextView: NSTextView {
             it.image = Self.swatch(c.hlLight)
             marks.addItem(it)
         }
-        let markItem = NSMenuItem(title: "Выделить цветом", action: nil, keyEquivalent: "")
+        let markItem = NSMenuItem(title: tr("Highlight Color"), action: nil, keyEquivalent: "")
         markItem.submenu = marks
         menu.addItem(markItem)
-        menu.addItem(item("Убрать выделение", "unmark"))
+        menu.addItem(item(tr("Remove Highlight"), "unmark"))
         menu.addItem(.separator())
 
         for it in base.items { base.removeItem(it); menu.addItem(it) }   // стандартные: копировать, вставить…

@@ -6,23 +6,23 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section("Основная папка") {
+            Section(tr("Main Folder")) {
                 HStack {
                     Image(systemName: "books.vertical")
                     Text(model.mainURL.path).lineLimit(1).truncationMode(.middle)
                     Spacer()
-                    Button("Выбрать…") { model.chooseMainFolder() }
+                    Button(tr("Choose…")) { model.chooseMainFolder() }
                 }
                 if model.mainURL.path != ReaderModel.defaultMain.path {
-                    Button("Вернуть Documents/MDown") { model.resetMainFolder() }
+                    Button(tr("Restore Documents/MDown")) { model.resetMainFolder() }
                 }
-                Text("Здесь живут заметки. Подпапки — это разделы.")
+                Text(tr("Your notes live here. Subfolders are sections."))
                     .font(.caption).foregroundStyle(.secondary)
             }
 
-            Section("Дополнительные папки") {
+            Section(tr("Extra Folders")) {
                 if model.extraFolders.isEmpty {
-                    Text("Пока нет. Добавьте папки, чтобы работать с несколькими местами сразу, они появятся в боковой панели.")
+                    Text(tr("None yet. Add folders to work with several places at once; they appear in the sidebar."))
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 ForEach(model.extraFolders, id: \.path) { url in
@@ -32,13 +32,23 @@ struct SettingsView: View {
                         Spacer()
                         Button { model.removeExtraFolder(url) } label: { Image(systemName: "minus.circle") }
                             .buttonStyle(.borderless)
-                            .help("Убрать из списка (файлы не удаляются)")
+                            .help(tr("Remove from list (files are not deleted)"))
                     }
                 }
-                Button("Добавить папку…") { model.addExtraFolder() }
+                Button(tr("Add Folder…")) { model.addExtraFolder() }
             }
 
-            Section("Цвет темы") {
+            Section(tr("Language")) {
+                Picker(tr("Language"), selection: $model.language) {
+                    ForEach(AppLanguage.allCases, id: \.self) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.radioGroup)
+                .labelsHidden()
+                Text(tr("Interface language. Menus like Edit and Window switch after the app is restarted."))
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+
+            Section(tr("Theme Color")) {
                 HStack(spacing: 12) {
                     ForEach(Tint.allCases, id: \.self) { t in
                         Button { model.tint = t } label: {
@@ -54,7 +64,7 @@ struct SettingsView: View {
                         .help(t.title)
                     }
                 }
-                Text("Оттенок фона для чтения и редактирования: \(model.tint.title).")
+                Text(trf("Background tint for reading and editing: %@.", model.tint.title))
                     .font(.caption).foregroundStyle(.secondary)
             }
         }

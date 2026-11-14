@@ -2,14 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>CFBundleDevelopmentRegion</key><string>en</string>
+    <key>CFBundleLocalizations</key>
+    <array><string>en</string><string>ru</string></array>
     <key>CFBundleName</key><string>MDown</string>
     <key>CFBundleDisplayName</key><string>MDown</string>
     <key>CFBundleIdentifier</key><string>local.mdown.app</string>
     <key>CFBundleIconFile</key><string>AppIcon</string>
     <key>CFBundleExecutable</key><string>MDown</string>
     <key>CFBundlePackageType</key><string>APPL</string>
-    <key>CFBundleShortVersionString</key><string>1.5</string>
-    <key>CFBundleVersion</key><string>5</string>
+    <key>CFBundleShortVersionString</key><string>1.7</string>
+    <key>CFBundleVersion</key><string>7</string>
     <key>NSHumanReadableCopyright</key><string>Peter Plyuvkov &amp; Claude</string>
     <key>LSMinimumSystemVersion</key><string>13.0</string>
     <key>NSHighResolutionCapable</key><true/>
